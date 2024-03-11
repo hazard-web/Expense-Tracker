@@ -94,11 +94,8 @@
 
 <body>
     <div class="form-control">
-        <form action="addUser" method="post">
+        <form action="/login" method="post">
             <div class="form-control-items">
-                <lable for="name">Enter Your Name:</lable>
-                <input type="text" name="name" id="name" class="name" required><br><br>
-
                 <label for="email">Email Address: </label>
                 <input type="email" name="email" id="email" class="email" required><br><br>
 
@@ -106,12 +103,12 @@
                 <input type="password" name="password" id="password" class="password" minlength="6" maxlength="25"
                     required><br><br>
 
-                <button type="submit">SignUp</button>
+                <button type="submit">Login</button>
             </div>
 
             <div class="div2">
-                <a href="/login">Login</a>
-                <a href="/existinguser">Existing-User</a>
+                <a href="/signUp">SignUp</a>
+                <a href="/newuser">New-User</a>
             </div>
 
 

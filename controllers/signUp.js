@@ -2,7 +2,7 @@ const User = require('../models/user');
 const path = require('path');
 
 exports.getUser = async (req, res, next) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'views', 'expense.html'))
+    res.sendFile(path.join(__dirname, '..', 'public', 'views', 'signUp.html'))
 };
 
 exports.postUser = async (req,res,next) => {
