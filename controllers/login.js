@@ -20,8 +20,8 @@ exports.postLogin = async (req, res, next) => {
 
         if (user) {
             if (password === user.password) {
-                res.redirect('/addExpense');
-                res.status(200).json({ message: 'User login successful' });
+                // res.status(200).json({ message: 'User login successful' });
+                res.redirect('/addExpensePage');
             } else {
                 res.status(400).json({ message: 'Invalid password' });
             }

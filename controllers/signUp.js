@@ -10,17 +10,15 @@ exports.getUser = async (req, res, next) => {
 exports.postUser = async (req, res, next) => {
     const { name, email, password } = req.body;
     try {
-        // Hash the password
-        // const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Create the user with the hashed password
-        const user = await User.create({
+        User.create({
             name,
             email,
-            password // Store hashed password in the database
-        });
-
-        res.status(200).json(user);
+            password: hashedPassword // Store hashed password in the database
+        })
+        res.redirect('/signUp');
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error creating the user' });

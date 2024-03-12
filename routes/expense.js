@@ -4,9 +4,10 @@ const router = express.Router();
 const expenseController = require('../controllers/expense');
 
 
-router.get('/addExpense', expenseController.getAddExpensePage);
+router.get('/addExpensePage', expenseController.getAddExpensePage);
 router.get('/addExpense', expenseController.getAddExpense);
-router.post('/addExpense', expenseController.postAddExpense);
+router.post('/addExpensePage', expenseController.postAddExpense);
+router.delete('/deleteExpense/:id', expenseController.postDeleteExpense);
 
 
 

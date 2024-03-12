@@ -28,15 +28,31 @@ exports.postAddExpense = async (req, res, next) => {
     };
 
     try {
-        const newExpense = await Expense.create({
+        Expense.create({
             description: expense.description,
             amount: expense.amount,
             category: expense.category
         });
-        res.status(201).json({ expense: newExpense });
+        res.redirect('/addExpensePage');
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to add expense' });
+    }
+};
+
+
+exports.postDeleteExpense = async (req, res, next) => {
+    try {
+        const expenseId = req.params.id;
+        const deletedExpense = await Expense.destroy({
+            where: {
+                id: expenseId
+            }
+        });
+        res.status(200).json({ deletedExpense });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete expense' });
     }
 };
 
