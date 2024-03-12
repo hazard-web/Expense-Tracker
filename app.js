@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const Sequelize = require('./util/database');
 const signUpRoutes = require('./routes/signUp');
 const loginRoutes = require('./routes/login');
+const expenseRoutes = require('./routes/expense');
 // const Cors = require('cors');
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 
 app.use(signUpRoutes);
 app.use(loginRoutes);
+app.use(expenseRoutes);
 // app.use(Cors());
 
 Sequelize.sync()
