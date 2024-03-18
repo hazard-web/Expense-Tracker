@@ -1,13 +1,39 @@
+const jwt = require('jwtwebtoken');
+const { authenticate } = require('../../middleware/auth');
+const { decode } = require('jsonwebtoken');
 window.addEventListener('DOMContentLoaded', () => {
     fetchData();
 });
 
-async function fetchData() {
+async function fetchData(req, res, next) {
     try {
-        const response = await axios.get('http://localhost:4000/addExpense');
-        const expenses = response.data.allExpenses;
-        expenses.forEach(expense => {
-            addExpenseToList(expense);
+        // Call the authentication middleware to verify the user's token
+        authenticate(req, res, async () => {
+            const token = req.header('Authorization');
+            if (!token) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
+
+            try {
+                // Get user ID from token
+                const decoded = jwt.verify(token, 'secretkey');
+                const userId = decoded.userId;
+
+                // Use the user ID to fetch expenses
+                const response = await axios.get('http://localhost:4000/addExpense', {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+
+                const expenses = response.data.allExpenses;
+                expenses.forEach(expense => {
+                    addExpenseToList(expense);
+                });
+            } catch (error) {
+                console.error(error);
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
         });
     } catch (error) {
         console.error(error);
@@ -22,22 +48,22 @@ function addExpenseToList(expense) {
 
     // Delete button
     const btnDelete = document.createElement('button');
-    btnDelete.textContent = 'Delete';
+    btnDelete.textContent = 'Delete Expense';
+    btnDelete.style.backgroundColor = 'blue';
+    btnDelete.style.color = 'white';
+    btnDelete.style.border = 'none';
+    btnDelete.style.cursor = 'pointer';
+    btnDelete.style.padding = '8px 16px';
+    btnDelete.style.margin = '0 10px';
+    btnDelete.style.fontSize = '14px';
+    btnDelete.style.borderRadius = '4px';
+    btnDelete.style.transition = 'background-color 0.3s, color 0.3s';
     btnDelete.className = 'btn btn-danger';
     btnDelete.addEventListener('click', () => {
         removeExpense(expense.id, li);
     });
 
-    // Edit button
-    const btnEdit = document.createElement('button');
-    btnEdit.textContent = 'Edit';
-    btnEdit.className = 'btn btn-primary';
-    btnEdit.addEventListener('click', () => {
-        editExpense(expense);
-    });
-
     li.appendChild(btnDelete);
-    li.appendChild(btnEdit);
     liEle.appendChild(li);
 }
 
@@ -49,24 +75,6 @@ async function removeExpense(id, liElement) {
         console.error(error);
     }
 }
-
-function editExpense(expense) {
-    const { id, description, amount, category } = expense;
-    document.getElementById('description').value = description;
-    document.getElementById('amount').value = amount;
-    document.getElementById('category').value = category;
- 
-
-    axios.delete('http://localhost:4000/deleteExpense/' + `${id}`)
-        .then(response => console.log(response))
-        .catch(err => console.log(err))
-
-
-
-    liEle.removeChild(li);
-}
-
-
 
 
 

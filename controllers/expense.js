@@ -12,7 +12,15 @@ exports.getAddExpensePage = async (req, res, next) => {
 
 exports.getAddExpense = async (req, res, next) => {
     try {
-        const expenses = await Expense.findAll();
+        const token = req.header('Authentication');
+        const decoded = jwt.verify(token, 'secretkey');
+        const userId = decoded.userId;
+
+        const expenses = await Expense.findAll({
+            where: {
+                userId: userId
+            }
+        })
         res.status(200).json({ allExpenses: expenses })
     } catch (err) {
         res.status(500).json({ error: err });
@@ -28,10 +36,15 @@ exports.postAddExpense = async (req, res, next) => {
     };
 
     try {
-        Expense.create({
+        const token = req.header('Authentication');
+        const decoded = jwt.verify(token,'secretkey');
+        const userId = decoded.userId;
+
+        await Expense.create({
             description: expense.description,
             amount: expense.amount,
-            category: expense.category
+            category: expense.category,
+            userId : userId
         });
         res.redirect('/addExpensePage');
     } catch (error) {
@@ -43,13 +56,24 @@ exports.postAddExpense = async (req, res, next) => {
 
 exports.postDeleteExpense = async (req, res, next) => {
     try {
+        const token = req.header('Authentication');
+        const decoded = jwt.verify(token,'secretkey');
+        const userId = decoded.userId;
+        
         const expenseId = req.params.id;
-        const deletedExpense = await Expense.destroy({
-            where: {
-                id: expenseId
-            }
-        });
-        res.status(200).json({ deletedExpense });
+        const deletedExpense = await Expense.findByPk(expenseId);
+
+        if (!deletedExpense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+
+        if (deletedExpense.userId !== userId) {
+            return res.status(403).json({ message: 'Unauthorized to delete this message '});
+        }
+
+        await Expense.destroy();
+        res.status(200).json({ message: 'Expense Deleted Successfully' });
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to delete expense' });

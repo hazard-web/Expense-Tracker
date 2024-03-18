@@ -5,6 +5,8 @@ const Sequelize = require('./util/database');
 const signUpRoutes = require('./routes/signUp');
 const loginRoutes = require('./routes/login');
 const expenseRoutes = require('./routes/expense');
+const User = require('./models/user');
+const Expense = require('./models/expense');
 const cors = require('cors');
 
 const app = express();
@@ -17,6 +19,10 @@ app.use(signUpRoutes);
 app.use(loginRoutes);
 app.use(expenseRoutes);
 app.use(cors());
+
+
+User.hasMany(Expense);
+Expense.belongsTo(User);
 
 Sequelize.sync()
     .then(result => {
