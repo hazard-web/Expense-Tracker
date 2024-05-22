@@ -1,38 +1,27 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const Sequelize = require('./util/database');
-const signUpRoutes = require('./routes/signUp');
-const loginRoutes = require('./routes/login');
-const expenseRoutes = require('./routes/expense');
-const User = require('./models/user');
-const Expense = require('./models/expense');
-const cors = require('cors');
-
+const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
+const sequelize = require("./util/database");
+const userRouter = require("./router/userRouter");
+const expenseRouter = require("./router/expenseRouter");
 
+const User = require("./models/userModel");
+const Expense = require("./models/expenseModel");
+
+app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public', 'js')));
 app.use(bodyParser.json());
-
-app.use(signUpRoutes);
-app.use(loginRoutes);
-app.use(expenseRoutes);
-app.use(cors());
-
+app.use("/", userRouter);
+app.use("/user", userRouter);
+app.use("/homePage", expenseRouter);
+app.use("/expense", expenseRouter);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
 
-Sequelize.sync()
-    .then(result => {
-        console.log(result);
-    })
-    .catch(err => console.error(err));
-
-
-const PORT = 4000;
-
-app.listen(process.env.PORT || PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+sequelize
+  .sync()
+  .then((result) => {
+    app.listen(3000);
+  })
+  .catch((err) => console.log(err));
