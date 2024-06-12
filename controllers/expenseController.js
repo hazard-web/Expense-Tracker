@@ -48,10 +48,14 @@ exports.addExpense = async (req, res, next) => {
         console.log(err);
       });
     await t.commit();
+
+    res.status(200).json({success:true, expense: newExpense });
+
   } catch {
     async (err) => {
       await t.rollback();
-      console.log(err);
+      console.error("Failed to add expense: ", err);
+      res.status(500).json({ success: false, message: "Failed to add Expense", error: err.message});
     };
   }
 };

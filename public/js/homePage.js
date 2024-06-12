@@ -13,7 +13,9 @@ categoryItems.forEach((item) => {
     categoryBtn.textContent = e.target.textContent;
     categoryInput.value = selectedCategory;
   });
-});async function addExpense(e) {
+});
+
+async function addExpense(e) {
   e.preventDefault();  // Prevent default form submission behavior
   try {
     const category = document.getElementById("categoryBtn");
@@ -242,6 +244,7 @@ async function isPremiumUser() {
     reportsLink.removeAttribute("onclick");
     leaderboardLink.removeAttribute("onclick");
     leaderboardLink.setAttribute("href", "/premium/getLeaderboardPage");
+    reportsLink.setAttribute("href", "/reports/getReportsPage");
     buyPremiumBtn.removeEventListener("click", buyPremium);
   } else {
   }

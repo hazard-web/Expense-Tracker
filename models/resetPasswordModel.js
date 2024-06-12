@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../util/database");
 
-const ResetPassword = sequelize.define("ResetPassword", {
+const ResetPassword = sequelize.define("resetpassword", {
   id: {
     type: Sequelize.STRING,
     primaryKey: true,
