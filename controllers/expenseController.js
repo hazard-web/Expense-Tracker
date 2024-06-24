@@ -19,6 +19,27 @@ exports.addExpense = async (req, res, next) => {
     const category = req.body.category;
     const description = req.body.description;
     const amount = req.body.amount;
+
+    console.log('Request Body:', req.body);
+    console.log('User', req.user);
+
+    const parts = date.split('-');
+    let validDate;
+    if(parts.length === 3){
+      const formateDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      validDate = new Date(formateDate);
+    }else{
+      validDate = new Date(date);
+    }
+    if(isNaN(validDate.getTime())){
+      console.log('Invalid date format:', date);
+      await t.rollback();
+      return res.status(400).send({ error: 'Invalid date format' });
+    }
+
+    console.log('Valid Date', validDate);
+    console.log('Starting user update for user id:', req.user.id);
+
     await User.update(
       {
         totalExpenses: req.user.totalExpenses + Number(amount),
@@ -26,9 +47,10 @@ exports.addExpense = async (req, res, next) => {
       { where: { id: req.user.id } },
       { transaction: t }
     );
+
     await Expense.create(
       {
-        date: date,
+        date: validDate,
         category: category,
         description: description,
         amount: amount,
@@ -43,7 +65,9 @@ exports.addExpense = async (req, res, next) => {
       .catch((err) => {
         console.log(err);
       });
+
     await t.commit();
+
   } catch {
     async (err) => {
       await t.rollback();
