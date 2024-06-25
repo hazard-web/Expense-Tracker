@@ -14,9 +14,7 @@ categoryItems.forEach((item) => {
     categoryInput.value = selectedCategory;
   });
 });
-
-async function addExpense(e) {
-  e.preventDefault();  // Prevent default form submission behavior
+async function addExpense() {
   try {
     const category = document.getElementById("categoryBtn");
     const description = document.getElementById("descriptionValue");
@@ -24,96 +22,78 @@ async function addExpense(e) {
     const categoryValue = category.textContent.trim();
     const descriptionValue = description.value.trim();
     const amountValue = amount.value.trim();
-
-    // Validation checks
-    if (categoryValue === "Select Category") {
+    if (categoryValue == "Select Category") {
       alert("Select the Category!");
-      return;
+      window.location.href("/homePage");
     }
     if (!descriptionValue) {
       alert("Add the Description!");
-      return;
+      window.location.href("/homePage");
     }
     if (!parseInt(amountValue)) {
       alert("Please enter the valid amount!");
-      return;
+      window.location.href("/homePage");
     }
-
     const currentDate = new Date();
     const day = currentDate.getDate();
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
+    // add leading zeros to day and month if needed
     const formattedDay = day < 10 ? `0${day}` : day;
     const formattedMonth = month < 10 ? `0${month}` : month;
+    // create the date string in date-month-year format
     const dateStr = `${formattedDay}-${formattedMonth}-${year}`;
-
+    // console.log(dateStr); // outputs something like "23-02-2023"
     const token = localStorage.getItem("token");
-    console.log("Sending request to add expense with:", {
-      date: dateStr,
-      category: categoryValue,
-      description: descriptionValue,
-      amount: parseInt(amountValue),
-    });
-
-    const res = await axios.post(
-      "http://localhost:3000/expense/addExpense",
-      {
-        date: dateStr,
-        category: categoryValue,
-        description: descriptionValue,
-        amount: parseInt(amountValue),
-      },
-      { headers: { Authorization: token } }
-    );
-
-    if (res.status === 200) {
-      console.log("Expense added successfully:", res.data);
-      window.location.reload();
-    } else {
-      console.error("Failed to add expense:", res);
-      alert("Failed to add expense!");
-    }
-  } catch (err) {
-    console.error("AddExpense went wrong:", err);
+    const res = await axios
+      .post(
+        "http://localhost:3000/expense/addExpense",
+        {
+          date: dateStr,
+          category: categoryValue,
+          description: descriptionValue,
+          amount: parseInt(amountValue),
+        },
+        { headers: { Authorization: token } }
+      )
+      .then((res) => {
+        if (res.status == 200) {
+          window.location.reload();
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch {
+    console.error("AddExpense went wrong");
   }
 }
-
 async function getAllExpenses() {
+  // e.preventDefault();
   try {
     const token = localStorage.getItem("token");
-    console.log("Fetching all expenses with token:", token);
-
     const res = await axios.get(
-      "http://localhost:3000/expense/getAllExpenses",
+      "http://localhost:3000/expense/getAllExpenses/1",
       { headers: { Authorization: token } }
     );
-
-    console.log("Fetched expenses:", res.data);
-
-    table.innerHTML = ''; // Clear existing rows
-    res.data.forEach((expenses) => {
+    res.data.expenses.forEach((expenses) => {
       const id = expenses.id;
       const date = expenses.date;
       const categoryValue = expenses.category;
       const descriptionValue = expenses.description;
       const amountValue = expenses.amount;
-
       let tr = document.createElement("tr");
       tr.className = "trStyle";
       table.appendChild(tr);
-
       let idValue = document.createElement("th");
       idValue.setAttribute("scope", "row");
       idValue.setAttribute("style", "display: none");
-
       let th = document.createElement("th");
       th.setAttribute("scope", "row");
       tr.appendChild(idValue);
       tr.appendChild(th);
-
       idValue.appendChild(document.createTextNode(id));
       th.appendChild(document.createTextNode(date));
-
       let td1 = document.createElement("td");
       td1.appendChild(document.createTextNode(categoryValue));
       let td2 = document.createElement("td");
@@ -121,7 +101,6 @@ async function getAllExpenses() {
       let td3 = document.createElement("td");
       td3.appendChild(document.createTextNode(amountValue));
       let td4 = document.createElement("td");
-
       let deleteBtn = document.createElement("button");
       deleteBtn.className = "editDelete btn btn-danger delete";
       deleteBtn.appendChild(document.createTextNode("Delete"));
@@ -130,14 +109,96 @@ async function getAllExpenses() {
       editBtn.appendChild(document.createTextNode("Edit"));
       td4.appendChild(deleteBtn);
       td4.appendChild(editBtn);
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+      tr.appendChild(td4);
+    });
+
+    // ---------------------------------------------------------------------//
+
+    const ul = document.getElementById("paginationUL");
+    for (let i = 1; i <= res.data.totalPages; i++) {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      li.setAttribute("class", "page-item");
+      a.setAttribute("class", "page-link");
+      a.setAttribute("href", "#");
+      a.appendChild(document.createTextNode(i));
+      li.appendChild(a);
+      ul.appendChild(li);
+      a.addEventListener("click", paginationBtn);
+    }
+  } catch {
+    (err) => console.log(err);
+  }
+}
+
+async function paginationBtn(e) {
+  try {
+    const pageNo = e.target.textContent;
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `http://localhost:3000/expense/getAllExpenses/${pageNo}`,
+      { headers: { Authorization: token } }
+    );
+
+    table.innerHTML = "";
+
+    res.data.expenses.forEach((expenses) => {
+      const id = expenses.id;
+      const date = expenses.date;
+      const categoryValue = expenses.category;
+      const descriptionValue = expenses.description;
+      const amountValue = expenses.amount;
+
+      let tr = document.createElement("tr");
+      tr.className = "trStyle";
+
+      table.appendChild(tr);
+
+      let idValue = document.createElement("th");
+      idValue.setAttribute("scope", "row");
+      idValue.setAttribute("style", "display: none");
+
+      let th = document.createElement("th");
+      th.setAttribute("scope", "row");
+
+      tr.appendChild(idValue);
+      tr.appendChild(th);
+
+      idValue.appendChild(document.createTextNode(id));
+      th.appendChild(document.createTextNode(date));
+
+      let td1 = document.createElement("td");
+      td1.appendChild(document.createTextNode(categoryValue));
+
+      let td2 = document.createElement("td");
+      td2.appendChild(document.createTextNode(descriptionValue));
+
+      let td3 = document.createElement("td");
+      td3.appendChild(document.createTextNode(amountValue));
+
+      let td4 = document.createElement("td");
+
+      let deleteBtn = document.createElement("button");
+      deleteBtn.className = "editDelete btn btn-danger delete";
+      deleteBtn.appendChild(document.createTextNode("Delete"));
+
+      let editBtn = document.createElement("button");
+      editBtn.className = "editDelete btn btn-success edit";
+      editBtn.appendChild(document.createTextNode("Edit"));
+
+      td4.appendChild(deleteBtn);
+      td4.appendChild(editBtn);
 
       tr.appendChild(td1);
       tr.appendChild(td2);
       tr.appendChild(td3);
       tr.appendChild(td4);
     });
-  } catch (err) {
-    console.error("Error fetching expenses:", err);
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -221,7 +282,6 @@ async function buyPremium(e) {
         },
         { headers: { Authorization: token } }
       );
-
       console.log(res);
       alert(
         "Welcome to our Premium Membership, You have now access to Reports and LeaderBoard"
@@ -249,7 +309,6 @@ async function isPremiumUser() {
   } else {
   }
 }
-
 buyPremiumBtn.addEventListener("click", buyPremium);
 addExpenseBtn.addEventListener("click", addExpense);
 document.addEventListener("DOMContentLoaded", isPremiumUser);

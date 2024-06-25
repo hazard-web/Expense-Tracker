@@ -7,9 +7,9 @@ router.use(express.static("public"));
 
 router.get("/", expenseController.getHomePage);
 router.get(
-  "/getAllExpenses",
+  "/getAllExpenses/:page",
   userAuthentication,
-  expenseController.getAllExpenses
+  expenseController.getAllExpensesforPagination
 );
 router.get(
   "/deleteExpense/:id",
