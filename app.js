@@ -7,7 +7,8 @@ const https = require("https");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const helmet  = require("helmet");
+const compression = require("compression");
+const helmet = require("helmet");
 
 app.use(
   helmet({
@@ -15,6 +16,8 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
+
+app.use(compression());
 
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "access.log"),
@@ -38,8 +41,8 @@ const Expense = require("./models/expenseModel");
 const Order = require("./models/ordersModel");
 const ResetPassword = require("./models/resetPasswordModel");
 
-const privatekey = fs.readFileSync('server.key');
-const certificate = fs.readFileSync('server.cert');
+// const privatekey = fs.readFileSync('server.key');
+// const certificate = fs.readFileSync('server.cert');
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -68,6 +71,7 @@ User.hasMany(ResetPassword);
 sequelize
   .sync()
   .then((result) => {
-    https.createServer({key: privatekey, cert: certificate}, app).listen(process.env.PORT || 3000);
+    //   https.createServer({key: privatekey, cert: certificate}, app).listen(process.env.PORT || 3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));
