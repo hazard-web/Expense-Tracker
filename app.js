@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -37,6 +38,9 @@ const Expense = require("./models/expenseModel");
 const Order = require("./models/ordersModel");
 const ResetPassword = require("./models/resetPasswordModel");
 
+const privatekey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert');
+
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -64,6 +68,6 @@ User.hasMany(ResetPassword);
 sequelize
   .sync()
   .then((result) => {
-    app.listen(process.env.PORT || 3000);
+    https.createServer({key: privatekey, cert: certificate}, app).listen(process.env.PORT || 3000);
   })
   .catch((err) => console.log(err));

@@ -3,3 +3,5 @@
 /package.json
 /package-lock.json
 /nodemon.json
+/server.cert
+/server.key
