@@ -4,11 +4,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sequelize = require("../util/database");
 const Sib = require("sib-api-v3-sdk");
-const config = require('../nodemon.json');
+// const config = require('../nodemon.json');
 function generateAccessToken(id, email) {
   return jwt.sign(
     { userId: id, email: email },
-      `${config.JWT_SECRET}`
+      `${process.env.JWT_SECRET}`
   );
 }
 const isPremiumUser = async (req, res, next) => {

@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const config  = require('../nodemon.json');
+// const config  = require('../nodemon.json');
 
 const authenticate = (req, res, next) => {
   try {
     const token = req.header("Authorization");
     const user = jwt.verify(
       token,
-      `${config.JWT_SECRET}`
+      `${process.env.JWT_SECRET}`
     );
     User.findByPk(user.userId).then((user) => {
       req.user = user;
