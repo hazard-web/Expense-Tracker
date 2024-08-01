@@ -4,11 +4,24 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
+const cors = require('cors');
 const dotenv = require("dotenv");
 dotenv.config();
 
 const compression = require("compression");
 const helmet = require("helmet");
+const morgan = require("morgan");
+
+
+const corsOptions = {
+  origin: 'http://localhost:3000', 
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type, Authorization',
+  credentials: true, // Allow credentials (cookies, etc.)
+};
+
+app.options('*', cors(corsOptions)); // Preflight requests
+app.use(express.json());
 
 app.use(
   helmet({
@@ -24,7 +37,7 @@ const accessLogStream = fs.createWriteStream(
   { flags: "a" }
 );
 
-const morgan = require("morgan");
+
 app.use(morgan("combined", { stream: accessLogStream }));
 
 
@@ -58,6 +71,19 @@ app.use("/premium", leaderboardRouter);
 app.use("/password", resetPasswordRouter);
 
 app.use("/reports", reportsRouter);
+
+app.use((req, res) => {
+  console.log('urlll', req.url)
+  const filePath = path.join(__dirname, `public${req.url}`);
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.log(`File not found: ${filePath}`);
+      res.status(404).send('Not Found');
+    } else {
+      res.sendFile(filePath);
+    }
+  });
+});
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
